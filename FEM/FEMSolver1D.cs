@@ -128,10 +128,10 @@ namespace FEM
 
         public static double Gauss(Func<double, double> f)
         {
-            return Integrate.GaussLegendre(f, -1, 1);
+            return Integrate.GaussLegendre(f, -1, 1, 2);
         }
 
-        public static List<(double, Func<double, double>)> Solve(string[] equation, double x0, double L, int n, int order)
+        public static List<(double, double[])> Solve(string[] equation, double x0, double L, int n, int order)
         {
             var x = Generate.LinearSpaced(n, x0, L);
             var h = x[1] - x[0];
@@ -177,36 +177,17 @@ namespace FEM
                 solutions.Add((E[i], U.GetColumn(i)));
 
             solutions = solutions.OrderBy(x => x.Item1).ToList();
-            var result = new List<(double, Func<double, double>)>();
+            var result = new List<(double, double[])>();
 
             for (int j = 0; j < solutions.Count; ++j)
             {
-                var q_reduced = solutions[0].Item2;
+                var q_reduced = solutions[j].Item2;
                 var q = new double[n];
 
                 for (int i = 1; i < n - 1; ++i)
                     q[i] = q_reduced[i - 1];
 
-                var f = new Func<double, double>(x0 =>
-                {
-                    var y = 0d;
-
-                    for (int e = 0; e < n - 1; ++e)
-                    {
-                        var u = 0d;
-
-                        var t = Local(x0, e, x);
-
-                        for (int i = 0; i < 2; ++i)
-                            u += q[e + i] * N(t, i, order);
-
-                        y += u;
-                    }
-
-                    return y * y;
-                });
-
-                result.Add((solutions[0].Item1, f));
+                result.Add((solutions[j].Item1, q));
             }
 
             return result;
