@@ -57,9 +57,17 @@
               "target": "Package",
               "version": "[3.8.0, )"
             },
+            "Delaunator": {
+              "target": "Package",
+              "version": "[1.0.10, )"
+            },
             "MathNet.Numerics": {
               "target": "Package",
               "version": "[5.0.0, )"
+            },
+            "Meta.Numerics": {
+              "target": "Package",
+              "version": "[4.1.4, )"
             },
             "ScottPlot": {
               "target": "Package",
@@ -131,6 +139,10 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
+            "Delaunator": {
+              "target": "Package",
+              "version": "[1.0.10, )"
+            },
             "MSTest.TestAdapter": {
               "target": "Package",
               "version": "[2.2.10, )"
@@ -138,6 +150,10 @@
             "MSTest.TestFramework": {
               "target": "Package",
               "version": "[2.2.10, )"
+            },
+            "Meta.Numerics": {
+              "target": "Package",
+              "version": "[4.1.4, )"
             },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",

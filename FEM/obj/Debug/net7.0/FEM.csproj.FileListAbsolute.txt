@@ -29,3 +29,5 @@ C:\Users\konis\Desktop\FEM\FEM\obj\Debug\net7.0\refint\FEM.dll
 C:\Users\konis\Desktop\FEM\FEM\obj\Debug\net7.0\FEM.pdb
 C:\Users\konis\Desktop\FEM\FEM\obj\Debug\net7.0\FEM.genruntimeconfig.cache
 C:\Users\konis\Desktop\FEM\FEM\obj\Debug\net7.0\ref\FEM.dll
+C:\Users\konis\Desktop\FEM\FEM\bin\Debug\net7.0\DelaunatorSharp.dll
+C:\Users\konis\Desktop\FEM\FEM\bin\Debug\net7.0\Meta.Numerics.dll

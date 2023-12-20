@@ -57,9 +57,17 @@
               "target": "Package",
               "version": "[3.8.0, )"
             },
+            "Delaunator": {
+              "target": "Package",
+              "version": "[1.0.10, )"
+            },
             "MathNet.Numerics": {
               "target": "Package",
               "version": "[5.0.0, )"
+            },
+            "Meta.Numerics": {
+              "target": "Package",
+              "version": "[4.1.4, )"
             },
             "ScottPlot": {
               "target": "Package",

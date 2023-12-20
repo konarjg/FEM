@@ -11,7 +11,9 @@
           "Accord": "3.8.0",
           "Accord.Extensions.Math": "3.0.1",
           "Accord.Math": "3.8.0",
+          "Delaunator": "1.0.10",
           "MathNet.Numerics": "5.0.0",
+          "Meta.Numerics": "4.1.4",
           "ScottPlot": "4.1.68"
         },
         "runtime": {
@@ -77,6 +79,14 @@
           }
         }
       },
+      "Delaunator/1.0.10": {
+        "runtime": {
+          "lib/netstandard2.0/DelaunatorSharp.dll": {
+            "assemblyVersion": "1.0.10.0",
+            "fileVersion": "1.0.10.0"
+          }
+        }
+      },
       "DotImaging.Primitives2D/2.5.3": {
         "runtime": {
           "lib/net45/DotImaging.Primitives2D.dll": {
@@ -90,6 +100,14 @@
           "lib/net6.0/MathNet.Numerics.dll": {
             "assemblyVersion": "5.0.0.0",
             "fileVersion": "5.0.0.0"
+          }
+        }
+      },
+      "Meta.Numerics/4.1.4": {
+        "runtime": {
+          "lib/netstandard1.1/Meta.Numerics.dll": {
+            "assemblyVersion": "4.1.4.0",
+            "fileVersion": "4.1.4.0"
           }
         }
       },
@@ -195,6 +213,13 @@
       "path": "accord.statistics/3.0.2",
       "hashPath": "accord.statistics.3.0.2.nupkg.sha512"
     },
+    "Delaunator/1.0.10": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-BYRTAWhPb0N9gIRGwSZ3vN5loMDIvNOOhJCsLT4usMYBqNH/oOuVsinzLxVrY8RFx7u3dGKaNhAbsuEVNJ79pw==",
+      "path": "delaunator/1.0.10",
+      "hashPath": "delaunator.1.0.10.nupkg.sha512"
+    },
     "DotImaging.Primitives2D/2.5.3": {
       "type": "package",
       "serviceable": true,
@@ -208,6 +233,13 @@
       "sha512": "sha512-pg1W2VwaEQMAiTpGK840hZgzavnqjlCMTVSbtVCXVyT+7AX4mc1o89SPv4TBlAjhgCOo9c1Y+jZ5m3ti2YgGgA==",
       "path": "mathnet.numerics/5.0.0",
       "hashPath": "mathnet.numerics.5.0.0.nupkg.sha512"
+    },
+    "Meta.Numerics/4.1.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-KWAL7TVGUFfIvK5n5WihTrRF5x3rYxW1GlsYTqpTLzXjxU3edNrZpFsD+3HhI+HhAdhfbkSU8SkJxNoTlD3xHA==",
+      "path": "meta.numerics/4.1.4",
+      "hashPath": "meta.numerics.4.1.4.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/3.1.4": {
       "type": "package",

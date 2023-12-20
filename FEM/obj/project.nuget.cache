@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "vAzC6XRmMCLQaMl6NSj8MdnssPC/w/OgNpn0Lu+X3iaYJSK0mfglxGtVHLHt2877OLXdh6oZCDZRMuX/Ojqg6w==",
+  "dgSpecHash": "qbwZYVkwq8WohtIFB6W/mcuuBXE8v6g+UzAk47cVvu3bq4hOV6J0rwO8OPhytt6KyxZo3V7IIZjihDViNrgKng==",
   "success": true,
   "projectFilePath": "C:\\Users\\konis\\Desktop\\FEM\\FEM\\FEM.csproj",
   "expectedPackageFiles": [
@@ -9,8 +9,10 @@
     "C:\\Users\\konis\\.nuget\\packages\\accord.extensions.math\\3.0.1\\accord.extensions.math.3.0.1.nupkg.sha512",
     "C:\\Users\\konis\\.nuget\\packages\\accord.math\\3.8.0\\accord.math.3.8.0.nupkg.sha512",
     "C:\\Users\\konis\\.nuget\\packages\\accord.statistics\\3.0.2\\accord.statistics.3.0.2.nupkg.sha512",
+    "C:\\Users\\konis\\.nuget\\packages\\delaunator\\1.0.10\\delaunator.1.0.10.nupkg.sha512",
     "C:\\Users\\konis\\.nuget\\packages\\dotimaging.primitives2d\\2.5.3\\dotimaging.primitives2d.2.5.3.nupkg.sha512",
     "C:\\Users\\konis\\.nuget\\packages\\mathnet.numerics\\5.0.0\\mathnet.numerics.5.0.0.nupkg.sha512",
+    "C:\\Users\\konis\\.nuget\\packages\\meta.numerics\\4.1.4\\meta.numerics.4.1.4.nupkg.sha512",
     "C:\\Users\\konis\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.4\\microsoft.netcore.platforms.3.1.4.nupkg.sha512",
     "C:\\Users\\konis\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
     "C:\\Users\\konis\\.nuget\\packages\\scottplot\\4.1.68\\scottplot.4.1.68.nupkg.sha512",

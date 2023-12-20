@@ -5,10 +5,13 @@ using Accord.Math;
 using Accord.Math.Decompositions;
 using Accord.Math.Integration;
 using Accord.Statistics;
+using Accord.Statistics.Distributions.DensityKernels;
+using DelaunatorSharp;
 using FEM.Symbolics;
 using MathNet.Numerics;
 using MathNet.Numerics.Integration;
 using MathNet.Numerics.LinearAlgebra;
+using Meta.Numerics.Functions;
 using ScottPlot;
 using ScottPlot.MinMaxSearchStrategies;
 using System;
@@ -16,6 +19,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Numerics;
 using System.Text;
@@ -51,12 +55,31 @@ namespace FEM
             return LTOG;
         }
 
+        public static Dictionary<(int, int, int), (int, int)> GenerateMesh(int[,] T)
+        {
+            var mesh = new Dictionary<(int, int, int), (int, int)>();
+
+            for (int e = 0; e < T.GetLength(0); ++e)
+            {
+                for (int i = 0; i < 4; ++i)
+                {
+                    for (int j = 0; j < 4; ++j)
+                    {
+                        var k = (T[e, i], T[e, j]);
+
+                        if (!mesh.ContainsKey((e, i, j)))
+                            mesh.Add((e, i, j), k);
+                    }
+                }
+            }
+
+            return mesh;
+        }
+
         public static void PlotMesh(double[,] domain, int Nx, int Ny)
         {
             var x = Generate.LinearSpaced(Nx, domain[0, 0], domain[0, 1]);
             var y = Generate.LinearSpaced(Ny, domain[1, 0], domain[1, 1]);
-            var dx = x[1] - x[0];
-            var dy = y[1] - y[0];
             var mesh = LTOG(Nx, Ny);
 
             var plot = new Plot();
@@ -104,7 +127,7 @@ namespace FEM
             {
                 for (int i = 0; i < Nx; ++i)
                 {
-                    plot.AddPoint(x[i], y[j], Color.Black, 1);
+                    plot.AddPoint(x[i], y[j], Color.Black, 3);
                     ++node;
                 }
             }
@@ -115,11 +138,22 @@ namespace FEM
         }
 
         //Global to local coordinates transform
-        public static (double, double) Local((double, double) R0, int e, (double[], double[]) R)
+        public static (double, double) Local(int[,] LTOG,(double, double) R0, int e, (double[], double[]) R)
         {
-            //todo
+            var x = R.Item1;
+            var y = R.Item2;
+            var x0 = R0.Item1;
+            var y0 = R0.Item2;
+            var dx = x[1] - x[0];
+            var dy = y[1] - y[0];
 
-            return (0, 0);
+            var xe = x[LTOG[e, 0] / y.Length];
+            var ye = y[LTOG[e, 0] % y.Length];
+
+            var t = 2 / dx * (x0 - xe) - 1;
+            var r = 2 / dy * (y0 - ye) - 1;
+
+            return (t, r);
         }
 
         //Local to global coordinates transform
@@ -132,17 +166,11 @@ namespace FEM
             
             var Ny = y.Length;
 
-            var x0 = 0d;
-            var y0 = 0d;
+            var dx = x[1] - x[0];
+            var dy = y[1] - y[0];
 
-            var xe = new double[] { x[LTOG[e, 0] / Ny], x[LTOG[e, 1] / Ny], x[LTOG[e, 2] / Ny], x[LTOG[e, 3] / Ny] };
-            var ye = new double[] { y[LTOG[e, 0] % Ny], y[LTOG[e, 1] % Ny], y[LTOG[e, 2] % Ny], y[LTOG[e, 3] % Ny] };
-
-            for (int i = 0; i < 4; ++i)
-            {
-                x0 += N(t, r, i) * xe[i];
-                y0 += N(t, r, i) * ye[i];
-            }
+            var x0 = x[LTOG[e, 0] / Ny] + dx / 2 * (t + 1);
+            var y0 = y[LTOG[e, 0] % Ny] + dy / 2 * (r + 1);
 
             return (x0, y0);
         }
@@ -213,31 +241,6 @@ namespace FEM
             throw new ArgumentException();
         }
 
-        public static Func<double, double, (double[,], double)> Jacobian(int[,] LTOG, int e, (double[], double[]) R)
-        {
-            var J = new double[2, 2];
-            var x = R.Item1;
-            var y = R.Item2;
-            var Ny = y.Length;
-
-            var xye = new double[4, 2];
-            var xe = new double[] { x[LTOG[e, 0] / Ny], x[LTOG[e, 1] / Ny], x[LTOG[e, 2] / Ny], x[LTOG[e, 3] / Ny] };
-            var ye = new double[] { y[LTOG[e, 0] % Ny], y[LTOG[e, 1] % Ny], y[LTOG[e, 2] % Ny], x[LTOG[e, 3] % Ny] };
-            xye = xye.SetColumn(0, xe).SetColumn(1, ye);
-
-            return new Func<double, double, (double[,], double)>((t, r) =>
-            {
-                var Dxy = new double[2, 4];
-                var Dx = new double[4] { Dt(t, r, 0), Dt(t, r, 1), Dt(t, r, 2), Dt(t, r, 3) };
-                var Dy = new double[4] { Dr(t, r, 0), Dr(t, r, 1), Dr(t, r, 2), Dr(t, r, 3) };
-
-                Dxy = Dxy.SetRow(0, Dx).SetRow(1, Dy);
-                J = Dxy.Dot(xye);
-
-                return (J.Inverse(), J.Determinant());
-            });
-        }
-
         //Element stiffness matrix component
         public static double K(double J, double t, double r, int i, int j)
         {
@@ -245,10 +248,10 @@ namespace FEM
         }
 
         //First order element stiffness matrix component
-        public static double K1(int var, double J, double[,] invJ, double t, double r, int i, int j)
+        public static double K1(int var, double J, double[] invJ, double t, double r, int i, int j)
         {
-            var Dx = Dt(t, r, j) * invJ[0, 0] + Dr(t, r, j) * invJ[1, 0];
-            var Dy = Dt(t, r, j) * invJ[1, 0] + Dr(t, r, j) * invJ[1, 1];
+            var Dx = Dt(t, r, j) * invJ[0];
+            var Dy = Dr(t, r, j) * invJ[1];
 
             if (var == 0)
                 return J * N(t, r, i) * Dx;
@@ -257,12 +260,12 @@ namespace FEM
         }
 
         //Second order element stiffness matrix component
-        public static double K2(int var, double J, double[,] invJ, double t, double r, int i, int j)
+        public static double K2(int var, double J, double[] invJ, double t, double r, int i, int j)
         {
-            var Dux = Dt(t, r, j) * invJ[0, 0] + Dr(t, r, j) * invJ[1, 0];
-            var Duy = Dt(t, r, j) * invJ[1, 0] + Dr(t, r, j) * invJ[1, 1];
-            var Dvx = Dt(t, r, i) * invJ[0, 0] + Dr(t, r, i) * invJ[1, 0];
-            var Dvy = Dt(t, r, i) * invJ[1, 0] + Dr(t, r, i) * invJ[1, 1];
+            var Dux = Dt(t, r, j) * invJ[0];
+            var Duy = Dr(t, r, j) * invJ[1];
+            var Dvx = Dt(t, r, i) * invJ[0];
+            var Dvy = Dr(t, r, i) * invJ[1];
 
             if (var == 0)
                 return -J * (Dux * Dvx);
@@ -278,22 +281,10 @@ namespace FEM
 
         public static double Gauss(Func<double, double, double> f)
         {
-            var t = new double[2] { -1 / Math.Sqrt(3), 1 / Math.Sqrt(3) };
-            var r = new double[2] { -1 / Math.Sqrt(3), 1 / Math.Sqrt(3) };
-            var w = new double[2] { 1, 1 };
-
-            var y = 0d;
-
-            for (int i = 0; i < 2; ++i)
-            {
-                for (int j = 0; j < 2; ++j)
-                    y += f(t[i], r[j]) * w[i] * w[j];
-            }
-
-            return y;
+            return GaussLegendreRule.Integrate(f, -1, 1, -1, 1, 4);
         }
 
-        public static double/*List<(double, Func<double, double, double>)>*/ Solve(string[] equation, double[,] domain, int nx, int ny, bool polar = false)
+        public static List<(double, Func<double, double, double>)> Solve(string[] equation, double[,] domain, int nx, int ny)
         {
             var x = Generate.LinearSpaced(nx, domain[0, 0], domain[0, 1]);
             var y = Generate.LinearSpaced(ny, domain[1, 0], domain[1, 1]);
@@ -301,47 +292,50 @@ namespace FEM
             var dy = y[1] - y[0];
 
             var T = LTOG(nx, ny);
+            var mesh = GenerateMesh(T);
             PlotMesh(domain, nx, ny);
 
-            var A = CreateMatrix.Sparse<double>(nx * ny, nx * ny);
-            var B = CreateMatrix.Sparse<double>(nx * ny, nx * ny);
+            var H = CreateMatrix.Sparse<double>(nx * ny, nx * ny);
+            var D = CreateMatrix.Sparse<double>(nx * ny, nx * ny);
+
+            var A = new List<Matrix<double>>();
+            var B = new List<Matrix<double>>();
 
             var a = new Expression[equation.Length];
 
             for (int i = 0; i < equation.Length; ++i)
                 a[i] = new Expression(equation[i]);
 
-            for (int e = 0; e < (nx - 1) * (ny - 1); ++e)
+            for (int e = 0; e < mesh.Count / 16; ++e)
             {
-                var jacobi = Jacobian(T, e, (x, y));
+                var invJ = new double[] { 2 / dx, 2 / dy };
+                var detJ = dx * dy / 4;
+
+                var Ae = CreateMatrix.Sparse<double>(4, 4);
+                var Be = CreateMatrix.Sparse<double>(4, 4);
 
                 for (int i = 0; i < 4; ++i)
                 {
                     for (int j = 0; j < 4; ++j)
                     {
-                        var I = T[e, i];
-                        var J = T[e, j];
-
-                        A[I, J] += Gauss((t, r) =>
+                        Ae[i, j] = Gauss((t, r) =>
                         {
-                            var jacobi_e = jacobi(t, r);
-                            var detJ = jacobi_e.Item2;
-                            var invJ = jacobi_e.Item1;
-
                             var R0 = Global(T, (t, r), e, (x, y));
-                            return R0.Item1 * (a[0].Calculate(R0.Item1, R0.Item2) * K2(0, detJ, invJ, t, r, i, j) + a[1].Calculate(R0.Item1, R0.Item2) * K2(1, detJ, invJ, t, r, i, j) + a[2].Calculate(R0.Item1, R0.Item2) * K1(0, detJ, invJ, t, r, i, j) + a[3].Calculate(R0.Item1, R0.Item2) * K1(0, detJ, invJ, t, r, i, j) + a[4].Calculate(R0.Item1, R0.Item2) * K(detJ, t, r, i, j));
+
+                            return a[0].Calculate(R0.Item1, R0.Item2) * K2(0, detJ, invJ, t, r, i, j) + a[1].Calculate(R0.Item1, R0.Item2) * K2(1, detJ, invJ, t, r, i, j) + a[2].Calculate(R0.Item1, R0.Item2) * K1(0, detJ, invJ, t, r, i, j) + a[3].Calculate(R0.Item1, R0.Item2) * K1(0, detJ, invJ, t, r, i, j) + a[4].Calculate(R0.Item1, R0.Item2) * K(detJ, t, r, i, j);
                         });
 
-                        B[I, J] += Gauss((t, r) =>
+                        Be[i, j] = Gauss((t, r) =>
                         {
-                            var jacobi_e = jacobi(t, r);
-                            var detJ = jacobi_e.Item2;
                             var R0 = Global(T, (t, r), e, (x, y));
 
-                            return R0.Item1 * K(detJ, t, r, i, j);
+                            return K(detJ, t, r, i, j);
                         });
                     }
                 }
+
+                A.Add(Ae);
+                B.Add(Be);
             }
 
             var boundary = new List<int>();
@@ -355,16 +349,29 @@ namespace FEM
             boundary.Sort();
             var adjust = 0;
 
+            for (int i = 0; i < mesh.Count; ++i)
+            {
+                var element = mesh.ElementAt(i);
+                var e = element.Key.Item1;
+                var I = element.Key.Item2;
+                var J = element.Key.Item3;
+
+                var k = element.Value;
+
+                H[k.Item1, k.Item2] += A[e][I, J];
+                D[k.Item1, k.Item2] += B[e][I, J];
+            }
+
             for (int i = 0; i < boundary.Count; ++i)
             {
                 var j = boundary[i];
 
-                A = A.RemoveRow(j - adjust).RemoveColumn(j - adjust);
-                B = B.RemoveRow(j - adjust).RemoveColumn(j - adjust);
+                H = H.RemoveRow(j - adjust).RemoveColumn(j - adjust);
+                D = D.RemoveRow(j - adjust).RemoveColumn(j - adjust);
                 ++adjust;
             }
 
-            var evd = new GeneralizedEigenvalueDecomposition(A.ToArray(), B.ToArray());
+            var evd = new GeneralizedEigenvalueDecomposition(H.ToArray(), D.ToArray());
             var E = evd.RealEigenvalues;
             var U = evd.Eigenvectors;
             var solutions = new List<(double, double[])>();
@@ -372,36 +379,46 @@ namespace FEM
             for (int i = 0; i < E.Length; ++i)
                 solutions.Add((E[i], U.GetColumn(i)));
 
-            solutions = solutions.OrderBy(x => x.Item1).Where(x => x.Item1 > 0).ToList();
-            var result = new List<(double, Func<double, double>)>();
+            solutions = solutions.OrderBy(x => x.Item1).ToList();
+            var result = new List<(double, Func<double, double, double>)>();
 
-            var exact = new List<((int, int), double)>();
-            var Lx = domain[0, 1];
-            var Ly = domain[1, 1];
-
-            for (int i = 1; i <= 3; ++i)
+            for (int i = 0; i < solutions.Count; ++i)
             {
-                for (int j = 0; j <= 3; ++j)
+                var q_reduced = solutions[i].Item2;
+                var q = new double[nx * ny];
+                var m = 0;
+
+                for (int k = 0; k < nx * ny; ++k)
                 {
-                    var Er = -Math.Pow(1 / Lx, 2) * (i * i + (j * j) / (double)(i * i));
-                    exact.Add(((i, j), Er));
+                    if (boundary.Contains(k))
+                    {
+                        q[k] = 0;
+                        continue;
+                    }
+
+                    q[k] = q_reduced[m];
+                    ++m;
                 }
+
+                Func<double, double, double> u = (x0, y0) =>
+                {
+                    var u = 0d;
+
+                    for (int e = 0; e < T.GetLength(0); ++e)
+                    {
+                        var R = Local(T, (x0, y0), e, (x, y));
+
+                        for (int j = 0; j < 4; ++j)
+                            u += q[T[e, j]] * N(R.Item1, R.Item2, j);
+                    }
+
+                    return u * u;
+                };
+
+                result.Add((solutions[i].Item1, u));
             }
 
-            exact = exact.OrderBy(x => x.Item2).ToList();
-            var mse = 0d;
-            var refer = 0d;
-
-            for (int i = 0; i < exact.Count; ++i)
-            {
-                var measured = solutions[i].Item1;
-                mse += 1 / 9d * Math.Pow(measured - exact[i].Item2, 2);
-                refer += measured * measured;
-
-                Console.WriteLine("|   Energy level {0} ~E={1:0.000} E={2:0.000}  |", exact[i].Item1, measured, exact[i].Item2);
-            }
-
-            return Math.Sqrt(mse / refer) * 100;
+            return result;
         }
     }
 }

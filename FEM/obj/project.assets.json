@@ -91,6 +91,15 @@
           }
         }
       },
+      "Delaunator/1.0.10": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/DelaunatorSharp.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/DelaunatorSharp.dll": {}
+        }
+      },
       "DotImaging.Primitives2D/2.5.3": {
         "type": "package",
         "compile": {
@@ -110,6 +119,19 @@
         "runtime": {
           "lib/net6.0/MathNet.Numerics.dll": {
             "related": ".xml"
+          }
+        }
+      },
+      "Meta.Numerics/4.1.4": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.1/Meta.Numerics.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard1.1/Meta.Numerics.dll": {
+            "related": ".pdb;.xml"
           }
         }
       },
@@ -331,6 +353,19 @@
         "lib/net45/Accord.Statistics.xml"
       ]
     },
+    "Delaunator/1.0.10": {
+      "sha512": "BYRTAWhPb0N9gIRGwSZ3vN5loMDIvNOOhJCsLT4usMYBqNH/oOuVsinzLxVrY8RFx7u3dGKaNhAbsuEVNJ79pw==",
+      "type": "package",
+      "path": "delaunator/1.0.10",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "delaunator.1.0.10.nupkg.sha512",
+        "delaunator.nuspec",
+        "lib/net471/DelaunatorSharp.dll",
+        "lib/netstandard2.0/DelaunatorSharp.dll"
+      ]
+    },
     "DotImaging.Primitives2D/2.5.3": {
       "sha512": "UkZT6XU1QjQBeOCdvhQ7sGzgg7s7HgDl1T1ZM2qKEup3lVwFnBMyCsAvCNxGGH6DXL2cl/mbvwE50Nlqp9UeFA==",
       "type": "package",
@@ -363,6 +398,24 @@
         "lib/netstandard2.0/MathNet.Numerics.xml",
         "mathnet.numerics.5.0.0.nupkg.sha512",
         "mathnet.numerics.nuspec"
+      ]
+    },
+    "Meta.Numerics/4.1.4": {
+      "sha512": "KWAL7TVGUFfIvK5n5WihTrRF5x3rYxW1GlsYTqpTLzXjxU3edNrZpFsD+3HhI+HhAdhfbkSU8SkJxNoTlD3xHA==",
+      "type": "package",
+      "path": "meta.numerics/4.1.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "License.txt",
+        "Readme.md",
+        "ReleaseNotes.md",
+        "images/Riemann128.png",
+        "lib/netstandard1.1/Meta.Numerics.dll",
+        "lib/netstandard1.1/Meta.Numerics.pdb",
+        "lib/netstandard1.1/Meta.Numerics.xml",
+        "meta.numerics.4.1.4.nupkg.sha512",
+        "meta.numerics.nuspec"
       ]
     },
     "Microsoft.NETCore.Platforms/3.1.4": {
@@ -525,7 +578,9 @@
       "Accord >= 3.8.0",
       "Accord.Extensions.Math >= 3.0.1",
       "Accord.Math >= 3.8.0",
+      "Delaunator >= 1.0.10",
       "MathNet.Numerics >= 5.0.0",
+      "Meta.Numerics >= 4.1.4",
       "ScottPlot >= 4.1.68"
     ]
   },
@@ -586,9 +641,17 @@
             "target": "Package",
             "version": "[3.8.0, )"
           },
+          "Delaunator": {
+            "target": "Package",
+            "version": "[1.0.10, )"
+          },
           "MathNet.Numerics": {
             "target": "Package",
             "version": "[5.0.0, )"
+          },
+          "Meta.Numerics": {
+            "target": "Package",
+            "version": "[4.1.4, )"
           },
           "ScottPlot": {
             "target": "Package",
